@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>ผลประเมิน | ประชุมผู้ปกครองนักเรียน 2569</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#DB3F68">
+  <link rel="icon" href="assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/pm.css">
+</head>
+<body class="admin">
+  <header class="top">
+    <div class="wrap-wide">
+      <div class="bar">
+        <img src="assets/favicon.png" alt="">
+        <div>
+          <div class="t1">ผลประเมินการประชุมผู้ปกครอง</div>
+          <div class="t2">22 พ.ย. 2569 · โรงเรียนชุมชนวัดไทยงาม</div>
+        </div>
+        <div class="sp">
+          <a class="lnk" href="index.html" target="_blank">เปิดแบบประเมิน</a>
+          <button class="lnk hidden" id="logoutBtn">ออกจากระบบ</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div id="demoBanner" class="hidden" style="background:var(--warnsoft);color:#5C3D00">
+    <p class="wrap-wide small" style="margin:0;padding:8px 16px">โหมดทดลอง: ข้อมูลเก็บในเบราว์เซอร์เครื่องนี้เท่านั้น</p>
+  </div>
+
+  <!-- เข้าสู่ระบบ -->
+  <section id="loginView" class="hidden wrap login">
+    <div class="card" style="text-align:center">
+      <img src="assets/logo.png" alt="" style="width:80px">
+      <h1 style="font-size:23px;margin-top:10px">เข้าสู่ระบบผู้ดูแล</h1>
+      <p class="muted small" style="margin:4px 0 0">ใช้อีเมลและรหัสผ่านเดียวกับเว็บกีฬาภายใน</p>
+      <form id="loginForm" class="stack" style="margin-top:16px;text-align:left">
+        <label class="block"><span class="lbl">อีเมล</span><input id="email" type="email" required autocomplete="username" class="field"></label>
+        <label class="block" style="margin-top:12px"><span class="lbl">รหัสผ่าน</span><input id="password" type="password" required autocomplete="current-password" class="field"></label>
+        <p id="loginError" class="small" style="color:var(--bad);min-height:1.4em;margin:8px 0 0" role="alert"></p>
+        <button class="btn btn-primary btn-lg" id="loginBtn" style="margin-top:6px">เข้าสู่ระบบ</button>
+      </form>
+    </div>
+  </section>
+
+  <section id="denyView" class="hidden wrap" style="padding-top:48px;text-align:center">
+    <h1 style="font-size:24px">บัญชีนี้ไม่มีสิทธิ์ดูผลประเมิน</h1>
+    <p class="muted">เข้าสู่ระบบด้วย <b id="denyEmail"></b> ซึ่งไม่ตรงกับอีเมลผู้ดูแลใน js/config.js</p>
+    <button class="btn btn-primary" data-logout>ออกจากระบบ</button>
+  </section>
+
+  <!-- หน้าหลัก -->
+  <main id="appView" class="hidden wrap-wide" style="padding-top:16px;padding-bottom:8px">
+    <div class="tiles" id="tiles"></div>
+    <div class="row" style="margin-top:14px">
+      <span id="statusChip" class="small"></span>
+      <label class="small" style="display:flex;align-items:center;gap:8px;margin-left:auto">แสดงผล
+        <select id="gradeSel" class="field" style="width:auto;padding:7px 10px"></select>
+      </label>
+    </div>
+    <nav class="tabs" role="tablist" style="margin-top:12px" id="tabs"></nav>
+    <section id="panel" style="margin-top:14px"></section>
+    <div class="row printrow" style="margin-top:16px">
+      <button class="btn btn-primary" id="printBtn">🖨️ พิมพ์รายงานสรุป / PDF</button>
+      <span class="xs muted" id="printHint"></span>
+    </div>
+  </main>
+
+  <footer class="credit" id="creditFoot">
+    <div class="cr-badge"><span class="cr-ic" aria-hidden="true">💗</span><span class="cr-tx"><small>พัฒนาโดย</small><b>ธุรการไทยงาม</b></span></div>
+    <div class="cr-sub">ระบบประเมินความพึงพอใจการประชุมผู้ปกครองนักเรียน · โรงเรียนชุมชนวัดไทยงาม</div>
+  </footer>
+
+  <div id="report"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/pm-data.js"></script>
+  <script src="js/pm-store.js"></script>
+  <script src="js/pm-admin.js"></script>
+</body>
+</html>

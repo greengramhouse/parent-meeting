@@ -1,0 +1,91 @@
+rules_version = '2';
+// กฎความปลอดภัย Firestore (ฉบับรวม) โปรเจกต์ sportday69-c54a4
+// ใช้ร่วมกัน 2 ระบบ ข้อมูลแยกกันคนละ collection ไม่ปนกัน
+//
+// [ระบบกีฬาภายใน 2569 — ของเดิม ไม่ได้เปลี่ยน]
+// - live/state        : ผลการแข่งขัน ทุกคนอ่านได้ เขียนได้เฉพาะ admin
+// - surveys/{id}      : แบบประเมินกีฬาสี ทุกคนส่งได้ (เพิ่มอย่างเดียว) อ่าน/ลบได้เฉพาะ admin
+// - settings/survey   : เปิด/ปิดรับแบบประเมินกีฬาสี
+//
+// [ระบบประเมินการประชุมผู้ปกครอง 22 พ.ย. 2569 — เพิ่มใหม่]
+// - pmeet/{id}        : แบบประเมินการประชุมผู้ปกครอง ทุกคนส่งได้ (เพิ่มอย่างเดียว) อ่าน/ลบได้เฉพาะ admin
+// - settings/pmeet    : เปิด/ปิดรับแบบประเมินการประชุมผู้ปกครอง
+//
+// อีเมล admin ต้องตรงกับ adminEmail ใน js/config.js ของทั้ง 2 ระบบ
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+          && request.auth.token.email == 'waroon01@gmail.com';
+    }
+
+    function surveyOpen() {
+      return !exists(/databases/$(database)/documents/settings/survey)
+          || get(/databases/$(database)/documents/settings/survey).data.get('open', true) == true;
+    }
+
+    function pmeetOpen() {
+      return !exists(/databases/$(database)/documents/settings/pmeet)
+          || get(/databases/$(database)/documents/settings/pmeet).data.get('open', true) == true;
+    }
+
+    function shortText(t, k) {
+      return t.get(k, '') is string && t.get(k, '').size() <= 1000;
+    }
+
+    /* ---------- กีฬาภายใน (เดิม) ---------- */
+    function validSurvey(d) {
+      return d.keys().hasOnly(['group', 'demo', 'ans', 'text', 'v', 'createdAt'])
+          && d.group in ['teacher', 'student', 'parent']
+          && d.demo is map && d.demo.size() <= 12
+          && d.ans is map && d.ans.size() >= 5 && d.ans.size() <= 40
+          && d.text is map && d.text.keys().hasOnly(['like', 'problem', 'addsport', 'suggest'])
+          && shortText(d.text, 'like') && shortText(d.text, 'problem')
+          && shortText(d.text, 'addsport') && shortText(d.text, 'suggest')
+          && d.createdAt == request.time;
+    }
+
+    /* ---------- ประชุมผู้ปกครอง (ใหม่) ---------- */
+    function validPmeet(d) {
+      return d.keys().hasOnly(['group', 'demo', 'ans', 'text', 'v', 'createdAt'])
+          && d.group == 'parent'
+          && d.demo is map && d.demo.size() <= 10
+          && d.ans is map && d.ans.size() >= 5 && d.ans.size() <= 40
+          && d.text is map && d.text.keys().hasOnly(['like', 'want', 'suggest'])
+          && shortText(d.text, 'like') && shortText(d.text, 'want') && shortText(d.text, 'suggest')
+          && d.createdAt == request.time;
+    }
+
+    match /live/state {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /surveys/{id} {
+      allow create: if surveyOpen() && validSurvey(request.resource.data);
+      allow read, delete: if isAdmin();
+      allow update: if false;
+    }
+
+    match /pmeet/{id} {
+      allow create: if pmeetOpen() && validPmeet(request.resource.data);
+      allow read, delete: if isAdmin();
+      allow update: if false;
+    }
+
+    match /settings/survey {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /settings/pmeet {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
